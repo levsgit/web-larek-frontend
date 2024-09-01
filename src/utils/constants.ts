@@ -1,6 +1,41 @@
 export const API_URL = `${process.env.API_ORIGIN}/api/weblarek`;
 export const CDN_URL = `${process.env.API_ORIGIN}/content/weblarek`;
 
-export const settings = {
+export const SETTINGS = {
+  basketListSelector: ".basket__list",
+  addProductButtonSelector: ".card__button",
+  basketCounterSelector: ".header__basket-counter",
+  totalPriceSelector: ".basket__price",
+  orderButtonSelector: ".basket__button",
+  basketButtonSelector: ".header__basket",
+  basketItemSelector: ".basket__item",
+  BasketItemTamplateSelector: "#card-basket",
+  basketIndexSelector: ".basket__item-index",
+  basketCardTitleSelector: ".card__title",
+  basketCardPriceSelector: ".card__price",
+  basketItemDeleteSelector: ".basket__item-delete",
+  orderButtonsSelector: ".button_alt",
+  inputAdressSelector: ".form__input",
+  successDiscriptionSelector: ".order-success__description",
+  activeButtonClass: "button_alt-active",
+  gallerySelector: ".gallery",
+  cardTemplateSelector: "#card-catalog",
+  cardButtonSelector: ".gallery__item",
+  categorySelector: ".card__category",
+  titleSelector: ".card__title",
+  priceSelector: ".card__price",
+  imageSelector: ".card__image",
+  modalSelector: "#modal-container",
+  modalsSelector: ".modal",
+  cardModalSelector: ".card_full",
+  basketModalSelector: ".basket",
+  successModalSelector: ".order-success",
+  modalContentSelector: ".modal__content",
+  successModalButtonSelector: ".order-success__close",
+  categoryModalSelector: ".card__category",
+  titleModalSelector: ".card__title",
+  textModalSelector: ".card__text",
+  priceModalSelector: ".card__price",
+  buttonModalSelector: ".card__button",
+} as const;
 
-};
