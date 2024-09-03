@@ -1,18 +1,15 @@
 import { Api } from "../components/base/api"
 import { SETTINGS } from "../utils/constants"
 
+export type Category = "софт-скил" | "другое" | "дополнительное" | "хард-скил" | "кнопка";
+
 export interface Product {
   id: string
   description: string
   image: string
   title: string
-  category:string
+  category: string
   price: number | null
-}
-
-export interface ApiListResponse<T> {
-  items: T[];
-  totalCount: number;
 }
 
 export interface ProductList {
@@ -25,9 +22,8 @@ export interface Catalog {
 
 export interface Basket {
   basketItems: Product[];
-  selectedProduct: Product;
-  addBasket(): Product | false;
-  removeBasket(productID: string): void;
+  addToBasket(product: Product): Product | false;
+  removeFromBasket(productID: string): void;
   showBasketCounter(): number;
   calculateTotalPrice(): number;
   cleanBasket(): void;
@@ -54,44 +50,32 @@ export interface OrderSummary {
 export interface BasketUi {
   settings: typeof SETTINGS;
 
-  renderBasketItems(): void;
-  createBasketItems(product: Product, index: number): HTMLElement;
+  renderBasket(): void;
+  createBasketItem(product: Product, index: number): HTMLElement;
   changeBasketCounter(): void;
   showCalculateTotalPrice(): void;
-  resetBasket(): void;
-  toggleDisableButton(): void;
-  initBasket(): void;
 }
 
-interface OrderUI {
+export interface OrderUI {
   settings: typeof SETTINGS;
 
   selectButton(button: HTMLButtonElement): void;
 }
 
-interface CatalogUI {
+export interface CatalogUi {
   settings: typeof SETTINGS;
 
   renderCatalog(products: Product[], funcClick: (productId: string) => void): void;
-  addCardClick(card: HTMLButtonElement, product: Product, callback: (id: string) => void): void;
-  createCard(product: Product): HTMLElement;
+  createCard(product: Product, funcClick: (productId: string) => void): HTMLElement;
 }
 
+export interface Modals {
+  //TODO
+}
 
-interface App {
-  settings: typeof SETTINGS;
-  basketUi: BasketUi;
-  productList: ProductList;
-  catalog: CatalogUI;
-  api: Api;
-  basket: Basket;
-  orderUI: OrderUI;
-  order: Order;
-
-  initApp(): void;
-  getProducts(): void;
-  openCardModal(id: string): void;
-  createOrder(): void;
+export interface App {
+  initApp(settings: typeof SETTINGS,): void;
+  getProducts(api: Api, catalog: CatalogUi, modals: Modals): void;
 }
 
 

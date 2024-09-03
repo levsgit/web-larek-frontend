@@ -1,6 +1,14 @@
 export const API_URL = `${process.env.API_ORIGIN}/api/weblarek`;
 export const CDN_URL = `${process.env.API_ORIGIN}/content/weblarek`;
 
+export const CATEGORYMAP = {
+  "софт-скил": "card__category_soft",
+  "другое": "card__category_other",
+  "дополнительное": "card__category_additional",
+  "хард-скил": "card__category_hard",
+  "кнопка": "card__category_button",
+};
+
 export const SETTINGS = {
   basketListSelector: ".basket__list",
   addProductButtonSelector: ".card__button",
@@ -15,10 +23,13 @@ export const SETTINGS = {
   basketCardPriceSelector: ".card__price",
   basketItemDeleteSelector: ".basket__item-delete",
   orderButtonsSelector: ".button_alt",
+  formTemplateSelector: ".form",
   inputAdressSelector: ".form__input",
   successDiscriptionSelector: ".order-success__description",
   activeButtonClass: "button_alt-active",
   gallerySelector: ".gallery",
+  orderTemplateSelector: "#order",
+  basketTemplateSelector: "#basket",
   cardTemplateSelector: "#card-catalog",
   cardButtonSelector: ".gallery__item",
   categorySelector: ".card__category",
@@ -27,15 +38,28 @@ export const SETTINGS = {
   imageSelector: ".card__image",
   modalSelector: "#modal-container",
   modalsSelector: ".modal",
+  modalsClass: "modal",
+  modalCloseClass: "modal__close",
+  modalCardPreviewTemplateSelector: "#card-preview",
+  modalActiveClass: "modal_active",
+  modalActiveSelector: ".modal_active",
   cardModalSelector: ".card_full",
   basketModalSelector: ".basket",
   successModalSelector: ".order-success",
   modalContentSelector: ".modal__content",
-  successModalButtonSelector: ".order-success__close",
+  successModalButtonClass: "order-success__close",
   categoryModalSelector: ".card__category",
   titleModalSelector: ".card__title",
   textModalSelector: ".card__text",
   priceModalSelector: ".card__price",
   buttonModalSelector: ".card__button",
+  orderNextButtonSelector: ".order__button",
+  contactsTemplateSelector: "#contacts",
+  successTemplateSelector: "#success",
+  successContentSelector: ".order-success",
+  contactsEmailSelector: 'input[name="email"]',
+  contactsPhoneSelector: 'input[name="phone"]',
+  paymentActionSelector: '.modal__actions',
+  buttonSelector: '.button',
 } as const;
 
