@@ -1,19 +1,14 @@
 import { Order as OrderInterface, OrderSummary } from "../../types";
-import { Api } from "./api";
-import { Basket } from "./basket";
 
 export class Order implements OrderInterface {
-  api: Api;
   payment: string;
   address: string;
   email: string;
   phone: string;
   total: number;
-  basket: Basket;
+  items: string[] = [];
 
-  constructor(basket: Basket, api: Api) {
-    this.api = api;
-    this.basket = basket;
+  constructor() {
     this.payment = '';
     this.address = '';
     this.email = '';
@@ -33,19 +28,8 @@ export class Order implements OrderInterface {
       address: this.address,
       email: this.email,
       phone: this.phone,
-      items: this.basket.basketItems.map((product) => product.id),
+      items: this.items,
       total: this.total,
     }
   };
-
-  sendOrder(e: Event) {
-    e.preventDefault();
-    const order = this.returnOrder();
-
-    console.log(order);
-
-    this.api.post('/order', order).then(() => {
-      this.basket.cleanBasket();
-    }).catch((error) => console.error(error));
-  }
 }

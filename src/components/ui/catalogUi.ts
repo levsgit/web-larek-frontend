@@ -1,18 +1,15 @@
 import { CatalogUi as CatalogUIInterface } from "../../types";
 import { CDN_URL, SETTINGS, CATEGORYMAP } from "../../utils/constants";
 import { Product } from "../../types";
-import { Api } from "../base/api";
 import { Category } from "../../types";
 
 export class CatalogUi implements CatalogUIInterface {
   settings: typeof SETTINGS;
   categoryClassMap: typeof CATEGORYMAP;
-  api: Api;
   galleryElement: HTMLElement;
   cardTemplate: HTMLTemplateElement;
 
-  constructor(settings: typeof SETTINGS, api: Api, categoryClassMap: typeof CATEGORYMAP) {
-    this.api = api;
+  constructor(settings: typeof SETTINGS, categoryClassMap: typeof CATEGORYMAP) {
     this.settings = settings;
     this.categoryClassMap = categoryClassMap;
     this.galleryElement = document.querySelector(settings.gallerySelector);

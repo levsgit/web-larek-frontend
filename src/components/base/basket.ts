@@ -3,17 +3,12 @@ import { Basket as BasketInterface, Product } from "../../types"
 export class Basket implements BasketInterface {
   basketItems: Product[] = [];
 
-  constructor() {};
+  constructor() { };
 
-  addToBasket(product: Product): Product | false {
-    if (this.basketItems.some(item => item.id === product.id)) {
-      return false;
-    }
-  
+  addToBasket(product: Product) {
     this.basketItems.push(product);
-    return product;
   }
-  
+
   removeFromBasket(productID: string): void {
     const index = this.basketItems.findIndex(item => item.id === productID);
 

@@ -22,7 +22,7 @@ export interface Catalog {
 
 export interface Basket {
   basketItems: Product[];
-  addToBasket(product: Product): Product | false;
+  addToBasket(product: Product): void;
   removeFromBasket(productID: string): void;
   showBasketCounter(): number;
   calculateTotalPrice(): number;
