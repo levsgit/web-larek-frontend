@@ -3,38 +3,45 @@ import { SETTINGS } from "../../utils/constants"
 export class Modals {
   settings: typeof SETTINGS;
   modalContainer: HTMLElement;
-  modalBasketTemplate: HTMLTemplateElement;
+  modalContent: HTMLElement;
+  modalCloseButton: HTMLButtonElement;
 
   constructor(settings: typeof SETTINGS) {
     this.settings = settings;
     this.modalContainer = document.querySelector(settings.modalSelector);
-
+    this.modalContent = this.modalContainer.querySelector(this.settings.modalContentSelector);
     this.handleEscape = this.handleEscape.bind(this);
+    this.modalCloseButton = this.modalContainer.querySelector(this.settings.modalCloseSelector);
 
-    this.setCloseModal();
+    document.addEventListener('click', (event: MouseEvent) => {
+      if (this.modalContainer && this.modalContent) {
+        const target = event.target as HTMLElement;
+        if (this.modalContainer.contains(target) && !this.modalContent.contains(target)) {
+          this.closeModal();
+        }
+      }
+    });
+
+    this.modalCloseButton.addEventListener('click', () => {
+      this.closeModal();
+    });
   };
 
-  openModal(modal: HTMLElement) {
-    const modalContent = this.modalContainer.querySelector(this.settings.modalContentSelector);
-    modalContent.innerHTML = '';
+  openModal(modal: Element) {
+    this.modalContent.innerHTML = '';
     this.setHandleEscape();
-    modalContent.appendChild(modal);
+    this.modalContent.appendChild(modal);
     this.modalContainer.classList.add(this.settings.modalActiveClass);
   }
 
-  setCloseModal() {
-    this.modalContainer.addEventListener('click', (event: Event) => {
-      const target = event.target as HTMLDivElement;
-      if (target.classList.contains(this.settings.modalsClass) || target.classList.contains(this.settings.modalCloseClass) || target.classList.contains(this.settings.successModalButtonClass)) {
-        this.modalContainer.classList.remove(this.settings.modalActiveClass);
-        this.removeHandleEscape();
-      }
-    });
+  closeModal() {
+    this.modalContainer.classList.remove(this.settings.modalActiveClass);
+    this.removeHandleEscape();
   }
 
   handleEscape(e: KeyboardEvent) {
     if (e.key === 'Escape') {
-      this.modalContainer.classList.remove(this.settings.modalActiveClass);
+      this.closeModal();
     }
   }
 

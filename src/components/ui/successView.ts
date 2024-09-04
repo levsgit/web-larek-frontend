@@ -2,21 +2,19 @@ import { SETTINGS } from "../../utils/constants";
 
 export class SuccessUi {
   settings: typeof SETTINGS;
-  successTemplate: HTMLTemplateElement;
+  successModal: HTMLElement;
+  description: HTMLElement;
+  successButton: HTMLButtonElement;
 
   constructor(settings: typeof SETTINGS) {
     this.settings = settings;
-    this.successTemplate = document.querySelector(settings.successTemplateSelector);
+    this.successModal = (document.querySelector(settings.successTemplateSelector) as HTMLTemplateElement).content.querySelector(this.settings.successContentSelector);
+    this.description = this.successModal.querySelector(this.settings.successDiscriptionSelector);
+    this.successButton = this.successModal.querySelector(this.settings.successModalButtonSelector);
   }
 
   createSucessTemplate(price: number) {
-    const successContent = this.successTemplate.content;
-    const successTemplate = successContent.querySelector(this.settings.successContentSelector);
-    const successTemplateCopy = successTemplate.cloneNode(true) as HTMLElement;
-    const description = successTemplateCopy.querySelector(this.settings.successDiscriptionSelector);
-
-    description.textContent = `Списано ${price} синапсов`;
-
-    return successTemplateCopy;
+    this.description.textContent = `Списано ${price} синапсов`;
+    return this.successModal;
   }
 }

@@ -13,11 +13,13 @@ import { Order } from './components/base/order';
 import { PaymentUi } from './components/ui/paymentUi';
 import { ContactsUi } from './components/ui/ContactsUi';
 import { SuccessUi } from './components/ui/successView';
+import { BasketItemUi } from './components/ui/basketItemUi';
 
 const api = new Api(API_URL);
 const detailsView = new DetailsView(SETTINGS);
 const basket = new Basket();
 const basketUi = new BasketUi(SETTINGS);
+const basketItemUi = new BasketItemUi(SETTINGS);
 const paymentUi = new PaymentUi(SETTINGS);
 const catalog = new CatalogUi(SETTINGS, CATEGORYMAP);
 const order = new Order();
@@ -25,5 +27,5 @@ const modals = new Modals(SETTINGS);
 const contactsUi = new ContactsUi(SETTINGS);
 const successUi = new SuccessUi(SETTINGS);
 
-const app = new App(SETTINGS, api, detailsView, basket, modals, basketUi, catalog, paymentUi, order, contactsUi, successUi);
+const app = new App(SETTINGS, api, detailsView, basket, modals, basketUi, basketItemUi, catalog, paymentUi, order, contactsUi, successUi);
 app.initApp();

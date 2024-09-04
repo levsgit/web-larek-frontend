@@ -11,6 +11,7 @@ import { DetailsView } from "../ui/detailsView";
 import { PaymentUi } from "../ui/paymentUi";
 import { ContactsUi } from "../ui/ContactsUi";
 import { SuccessUi } from "../ui/successView";
+import { BasketItemUi } from "../ui/basketItemUi";
 
 export class App {
   settings: typeof SETTINGS;
@@ -19,6 +20,7 @@ export class App {
   basket: Basket;
   modals: Modals;
   basketUi: BasketUi;
+  basketItemUi: BasketItemUi;
   paymentUi: PaymentUi;
   contactsUi: ContactsUi;
   successUi: SuccessUi;
@@ -26,12 +28,13 @@ export class App {
   order: Order;
 
 
-  constructor(settings: typeof SETTINGS, api: Api, detailsView: DetailsView, basket: Basket, modals: Modals, basketUi: BasketUi, catalog: CatalogUi, paymentUi: PaymentUi, order: Order, contactsUi: ContactsUi, successUi: SuccessUi) {
+  constructor(settings: typeof SETTINGS, api: Api, detailsView: DetailsView, basket: Basket, modals: Modals, basketUi: BasketUi, basketItemUi: BasketItemUi, catalog: CatalogUi, paymentUi: PaymentUi, order: Order, contactsUi: ContactsUi, successUi: SuccessUi) {
     this.settings = settings;
     this.api = new Api(API_URL);
     this.detailsView = detailsView;
     this.basket = basket;
     this.basketUi = basketUi;
+    this.basketItemUi = basketItemUi;
     this.paymentUi = paymentUi;
     this.successUi = successUi;
     this.modals = modals;
@@ -43,6 +46,35 @@ export class App {
   initApp() {
     this.getProducts(this.api, this.catalog, this.modals);
     this.setBasketIconClick();
+    this.setPreviewButtonListeners();
+
+    this.basketUi.basketOrderButton.addEventListener('click', () => {
+      const basketItemsIds = this.basket.basketItems.map((product) => product.id);
+      this.order.items = basketItemsIds;
+
+      const price = this.basket.calculateTotalPrice();
+      this.order.total = price;
+
+      this.openPaymentModal();
+    });
+
+    this.paymentUi.nextButton.addEventListener('click', () => {
+      this.order.setParam('payment', this.paymentUi.selectedOption());
+      this.order.setParam('address', this.paymentUi.addressInput.value);
+      this.openContactsModal();
+    });
+
+    this.contactsUi.paymentButton.addEventListener('click', (e: Event) => {
+      this.order.setParam('email', this.contactsUi.emailInput.value.trim());
+      this.order.setParam('phone', this.contactsUi.phoneInput.value.trim());
+      this.sendOrder(e);
+      this.changeBasketCounter();
+      this.openSucessModal(this.order.total);
+    });
+
+    this.successUi.successButton.addEventListener('click', () => {
+      this.modals.closeModal();
+    });
   }
 
   getProducts(api: Api, catalog: CatalogUi, allModals: Modals) {
@@ -66,109 +98,75 @@ export class App {
     this.basketUi.updateCalculateTotalPrice(`${this.basket.calculateTotalPrice()}`)
   }
 
+  updateBasketNextButton() {
+    if (this.basket.basketItems.length === 0) {
+      this.basketUi.basketOrderButton.disabled = true;
+    } else {
+      this.basketUi.basketOrderButton.disabled = false;
+    }
+  }
+
+  setPreviewButtonListeners() {
+    this.detailsView.setPreviewButtonListeners(
+      (product: Product) => this.basket.addToBasket(product),
+      () => this.changeBasketCounter()
+    );
+  }
+
   openCardPreview(id: string) {
     this.api.get(`/product/${id}`).then((product: Product) => {
-      const cardTemplateCopy = this.detailsView.createCardModal(product);
-
+      this.detailsView.setOpenedProduct(product);
+      const cardModal = this.detailsView.createCardModal(product);
       const isProductAlreadyAdded = this.basket.basketItems.some(item => item.id === product.id) //true если есть
+
       if (isProductAlreadyAdded) {
-        (cardTemplateCopy.querySelector(this.settings.addProductButtonSelector) as HTMLButtonElement).disabled = true;
+        this.detailsView.disableModalCardButton();
+      } else {
+        this.detailsView.enableModalCardButton();
       }
-
-      cardTemplateCopy.querySelector(this.settings.buttonModalSelector).addEventListener('click', () => {
-        this.basket.addToBasket(product);
-        (cardTemplateCopy.querySelector(this.settings.addProductButtonSelector) as HTMLButtonElement).disabled = true
-        this.changeBasketCounter();
-      });
-
-      this.modals.openModal(cardTemplateCopy);
+      this.modals.openModal(cardModal);
     }).catch((console.error))
   }
 
   openBasketModal() {
-    const basketItems = this.basket.basketItems.map((product, index) => {
-      const basketItemTemplate = this.basketUi.createBasketItem(product, index + 1);
-      const basketItemDelete = basketItemTemplate.querySelector(this.settings.basketItemDeleteSelector);
+    const basketElement = this.renderBasketList();
+    this.modals.openModal(basketElement);
+  }
 
-      basketItemDelete.addEventListener('click', () => {
-        this.basket.removeFromBasket(product.id);
-        this.openBasketModal();
-        this.changeBasketCounter();
-        this.updateTotalPriceBasket();
-      })
+  renderBasketList() {
+    const basketItems = this.basket.basketItems.map((product, index) => {
+      const basketItemTemplate = this.basketItemUi.createBasketItem(
+        product,
+        index + 1,
+        (productId: string) => this.basket.removeFromBasket(productId),
+        () => this.renderBasketList()
+      );
 
       return basketItemTemplate;
     });
 
-    const basketTemplateCopy = this.basketUi.createBasketModal();
-    const basketOrderButton = basketTemplateCopy.querySelector(this.settings.orderButtonSelector) as HTMLButtonElement;
-    const basketList = basketTemplateCopy.querySelector(this.settings.basketListSelector);
-    basketItems.forEach((item) => {
-      basketList.appendChild(item);
-    });
+    const basketElement = this.basketUi.createBasketModal(basketItems);
 
-    if (this.basket.basketItems.length === 0) {
-      basketOrderButton.disabled = true;
-    } else {
-      basketOrderButton.addEventListener('click', () => {
-        const basketItemsIds = this.basket.basketItems.map((product) => product.id);
-        this.order.items = basketItemsIds;
-        this.openPaymentModal();
-      });
-    }
-
-    this.modals.openModal(basketTemplateCopy);
+    this.changeBasketCounter();
     this.updateTotalPriceBasket();
+    this.updateBasketNextButton();
+
+    return basketElement
   }
 
   openPaymentModal() {
-    const paymentTemplateCopy = this.paymentUi.createPaymentModal();
-
-    const paymentOptions = paymentTemplateCopy.querySelectorAll(this.settings.orderButtonsSelector);
-    const addressInput = paymentTemplateCopy.querySelector(this.settings.inputAdressSelector) as HTMLInputElement;
-    const nextButton = paymentTemplateCopy.querySelector(this.settings.orderNextButtonSelector);
-
-    paymentOptions.forEach((item) => {
-      item.addEventListener('click', () => {
-        const paymentOption = this.paymentUi.choosePaymentOption(paymentTemplateCopy, item as HTMLButtonElement);
-        this.order.setParam('payment', paymentOption);
-        this.paymentUi.checkValidationPayment(paymentTemplateCopy);
-      });
-    });
-
-    addressInput.addEventListener('input', () => {
-      this.paymentUi.checkValidationPayment(paymentTemplateCopy);
-    });
-
-    nextButton.addEventListener('click', () => {
-      this.order.setParam('address', addressInput.value);
-      this.openContactsModal();
-    });
-
-    this.modals.openModal(paymentTemplateCopy);
+    const paymentModal = this.paymentUi.createPaymentModal();
+    this.modals.openModal(paymentModal);
   }
 
   openContactsModal() {
-    const contactsTemplateCopy = this.contactsUi.createContactsTemplate()
+    const contactsModal = this.contactsUi.createContactsModal();
+    this.modals.openModal(contactsModal);
+  }
 
-    const emailInput = contactsTemplateCopy.querySelector(this.settings.contactsEmailSelector) as HTMLInputElement;
-    const phoneInput = contactsTemplateCopy.querySelector(this.settings.contactsPhoneSelector) as HTMLInputElement;
-    const paymentButton = contactsTemplateCopy.querySelector(this.settings.paymentActionSelector).querySelector(this.settings.buttonSelector) as HTMLButtonElement;
-
-    emailInput.addEventListener('input', () => { this.contactsUi.checkValidationContacts(contactsTemplateCopy) });
-    phoneInput.addEventListener('input', () => { this.contactsUi.checkValidationContacts(contactsTemplateCopy) });
-    paymentButton.addEventListener('click', (e: Event) => {
-      this.order.setParam('email', emailInput.value.trim());
-      this.order.setParam('phone', phoneInput.value.trim());
-      const price = this.basket.calculateTotalPrice();
-      this.order.total = price;
-      this.sendOrder(e);
-
-      this.changeBasketCounter();
-      this.openSucessModal(price);
-    });
-
-    this.modals.openModal(contactsTemplateCopy);
+  openSucessModal(price: number) {
+    const successModal = this.successUi.createSucessTemplate(price);
+    this.modals.openModal(successModal);
   }
 
   sendOrder(e: Event) {
@@ -179,11 +177,7 @@ export class App {
 
     this.api.post('/order', order).then(() => {
       this.basket.cleanBasket();
+      this.changeBasketCounter();
     }).catch((console.error));
-  }
-
-  openSucessModal(price: number) {
-    const successTemplate = this.successUi.createSucessTemplate(price);
-    this.modals.openModal(successTemplate);
   }
 }

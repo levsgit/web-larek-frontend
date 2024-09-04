@@ -1,53 +1,38 @@
-import { BasketUi as BasketUiInterface, Product } from "../../types";
 import { SETTINGS } from "../../utils/constants";
 
-export class BasketUi /*implements BasketUiInterface*/ {
+export class BasketUi {
   settings: typeof SETTINGS;
-  cardBasketTemplate: HTMLTemplateElement;
-  modalBasketTemplate: HTMLTemplateElement;
   basketCounter: HTMLElement;
+  modalBasket: HTMLElement;
+  basketList: HTMLElement;
+  basketOrderButton: HTMLButtonElement;
+  totalPriceElement: HTMLElement;
 
   constructor(settings: typeof SETTINGS) {
     this.settings = settings;
-    this.cardBasketTemplate = document.querySelector(settings.BasketItemTamplateSelector);
+
     this.basketCounter = document.querySelector(settings.basketCounterSelector);
-    this.modalBasketTemplate = document.querySelector(settings.basketTemplateSelector);
+    this.modalBasket = (document.querySelector(settings.basketTemplateSelector) as HTMLTemplateElement).content.querySelector(this.settings.basketModalSelector);
+    this.basketOrderButton = this.modalBasket.querySelector(this.settings.orderButtonSelector) as HTMLButtonElement;
+    this.basketList = this.modalBasket.querySelector(this.settings.basketListSelector);
+    this.totalPriceElement = this.modalBasket.querySelector(this.settings.totalPriceSelector);
   };
 
-  createBasketModal() {
-    const basketContent = this.modalBasketTemplate.content;
-    const basketTemplate = basketContent.querySelector(this.settings.basketModalSelector);
-    const basketTemplateCopy = basketTemplate.cloneNode(true) as HTMLElement;
+  createBasketModal(products: HTMLElement[]) {
+    this.basketList.innerHTML = '';
 
-    return basketTemplateCopy;
+    products.forEach((item) => {
+      this.basketList.appendChild(item);
+    });
+
+    return this.modalBasket;
   }
-
-  createBasketItem(product: Product, index: number): HTMLElement {
-    const contentBasketItems = this.cardBasketTemplate.content as DocumentFragment;
-    const basketItem = contentBasketItems.querySelector(this.settings.basketItemSelector);
-    const basketItemCopy = basketItem.cloneNode(true) as HTMLElement;
-    const basketIndex = basketItemCopy.querySelector(this.settings.basketIndexSelector);
-    const basketCardTitle = basketItemCopy.querySelector(this.settings.basketCardTitleSelector);
-    const basketCardPrice = basketItemCopy.querySelector(this.settings.basketCardPriceSelector);
-
-    basketIndex.textContent = `${index}`;
-    basketCardTitle.textContent = product.title;
-    basketCardPrice.textContent = `${product.price ? product.price : 0} синопсов`;
-
-    return basketItemCopy
-  };
 
   updateBasketCounter(total: string) {
     this.basketCounter.textContent = total;
   };
 
   updateCalculateTotalPrice(total: string) {
-    const totalPriceElement = document.querySelector(this.settings.basketModalSelector)
-      ?.querySelector(this.settings.totalPriceSelector);
-    totalPriceElement.textContent = total + ' синапсов';
+    this.totalPriceElement.textContent = total + ' синапсов';
   }
-
-  updateBasket() {
-
-  };
 }

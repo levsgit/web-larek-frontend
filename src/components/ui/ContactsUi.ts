@@ -2,30 +2,31 @@ import { SETTINGS } from "../../utils/constants";
 
 export class ContactsUi {
   settings: typeof SETTINGS;
-  contactsTemplate: HTMLTemplateElement;
+  contactsModal: HTMLTemplateElement;
+  emailInput: HTMLInputElement;
+  phoneInput: HTMLInputElement;
+  paymentButton: HTMLButtonElement;
 
   constructor(settings: typeof SETTINGS) {
     this.settings = settings;
-    this.contactsTemplate = document.querySelector(settings.contactsTemplateSelector);
+    this.contactsModal = (document.querySelector(settings.contactsTemplateSelector) as HTMLTemplateElement).content.querySelector(this.settings.formTemplateSelector);
+    this.emailInput = this.contactsModal.querySelector(this.settings.contactsEmailSelector) as HTMLInputElement;
+    this.phoneInput = this.contactsModal.querySelector(this.settings.contactsPhoneSelector) as HTMLInputElement;
+    this.paymentButton = this.contactsModal.querySelector(this.settings.paymentActionSelector).querySelector(this.settings.buttonSelector) as HTMLButtonElement;
+
+    this.emailInput.addEventListener('input', () => { this.checkValidationContacts() });
+    this.phoneInput.addEventListener('input', () => { this.checkValidationContacts() });
   };
 
-  createContactsTemplate() {
-    const contactsContent = this.contactsTemplate.content;
-    const contactsTemplate = contactsContent.querySelector(this.settings.formTemplateSelector);
-    const contactsTemplateCopy = contactsTemplate.cloneNode(true) as HTMLElement;
-
-    return contactsTemplateCopy;
+  createContactsModal() {
+    this.emailInput.value = '';
+    this.phoneInput.value = '';
+    this.checkValidationContacts();
+    return this.contactsModal;
   }
 
-  checkValidationContacts(contactsTemplateCopy: HTMLElement) {
-    const emailInput = contactsTemplateCopy.querySelector(this.settings.contactsEmailSelector) as HTMLInputElement;
-    const phoneInput = contactsTemplateCopy.querySelector(this.settings.contactsPhoneSelector) as HTMLInputElement;
-    const paymentButton = contactsTemplateCopy.querySelector(this.settings.paymentActionSelector).querySelector(this.settings.buttonSelector) as HTMLButtonElement;
-    const isValid = emailInput?.value.trim() !== '' && phoneInput?.value.trim() !== '';
-
-    if (paymentButton) {
-      paymentButton.disabled = !isValid;
-    }
+  checkValidationContacts() {
+    const isValid = !!(this.emailInput?.value.trim() && this.phoneInput?.value.trim());
+    this.paymentButton && (this.paymentButton.disabled = !isValid);
   }
-
 }
